@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+
 
 const NavItem = ({ to, icon, children }) => {
   const location = useLocation();
@@ -21,7 +23,13 @@ const NavItem = ({ to, icon, children }) => {
 };
 
 const Sidebar = () => {
-  return (
+  const { logout } = useAuth();
+const handleLogout = async () => {
+await logout();
+  };
+
+
+return (
     <div className="w-64 bg-white h-full shadow-md flex flex-col">
       <div className="flex items-center justify-center h-16 border-b">
         <h1 className="text-xl font-bold text-primary">Fisiosmart</h1>
@@ -59,7 +67,10 @@ const Sidebar = () => {
         </NavItem>
       </div>
       <div className="p-4 border-t">
-        <button className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md">
+        <button 
+          className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md"
+          onClick={handleLogout}
+        >
           <i className="fas fa-sign-out-alt mr-3"></i>
           Logout
         </button>
@@ -67,5 +78,4 @@ const Sidebar = () => {
     </div>
   );
 };
-
 export default Sidebar;

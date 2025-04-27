@@ -2,29 +2,42 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const Login = () => {
+const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [successMessage, setSuccessMessage] = useState('');
+  const { signup } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setLoading(true);
 
+    // Validazione basica
+    if (password.length < 6) {
+      setError('La password deve essere di almeno 6 caratteri');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { success, error } = await login(email, password);
+      const { success, error } = await signup(email, password, fullName);
       
       if (success) {
-        navigate('/dashboard');
+        setSuccessMessage('Registrazione completata! Controlla la tua email per confermare l\'account.');
+        setTimeout(() => {
+          navigate('/subscription');
+        }, 3000);
       } else {
-        setError(error || 'Si è verificato un errore durante il login');
+        setError(error || 'Si è verificato un errore durante la registrazione');
       }
     } catch (err) {
-      setError('Si è verificato un errore durante il login');
+      setError('Si è verificato un errore durante la registrazione');
     }
 
     setLoading(false);
@@ -36,7 +49,7 @@ const Login = () => {
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-primary">Fisiosmart</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Accedi al tuo account
+            Crea un nuovo account
           </p>
         </div>
         
@@ -46,8 +59,27 @@ const Login = () => {
           </div>
         )}
         
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{successMessage}</span>
+          </div>
+        )}
+        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="full-name" className="sr-only">Nome completo</label>
+              <input
+                id="full-name"
+                name="fullName"
+                type="text"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                placeholder="Nome completo"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
             <div>
               <label htmlFor="email-address" className="sr-only">Email</label>
               <input
@@ -56,7 +88,7 @@ const Login = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -68,7 +100,7 @@ const Login = () => {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="Password"
@@ -78,39 +110,21 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-primary hover:text-primary-dark">
-                Password dimenticata?
-              </Link>
-            </div>
-          </div>
-
           <div>
             <button
               type="submit"
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
             >
-              {loading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Accesso in corso...
-                </span>
-              ) : (
-                'Accedi'
-              )}
+              {loading ? 'Registrazione in corso...' : 'Registrati'}
             </button>
           </div>
           
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Non hai un account?{' '}
-              <Link to="/signup" className="font-medium text-primary hover:text-primary-dark">
-                Registrati
+              Hai già un account?{' '}
+              <Link to="/login" className="font-medium text-primary hover:text-primary-dark">
+                Accedi
               </Link>
             </p>
           </div>
@@ -120,4 +134,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
