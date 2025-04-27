@@ -1,4 +1,4 @@
-jsx// src/pages/Billing.jsx
+
 import React, { useState } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 
