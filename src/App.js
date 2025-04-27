@@ -1,13 +1,11 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
+import Patients from './pages/Patients';
+import Appointments from './pages/Appointments';
+import Exercises from './pages/Exercises';
+import Billing from './pages/Billing';
 import Login from './pages/Login';
-
-// Pagine temporanee per le altre sezioni
-const PatientsPage = () => <div>Pagina pazienti in costruzione</div>;
-const AppointmentsPage = () => <div>Pagina appuntamenti in costruzione</div>;
-const ExercisesPage = () => <div>Pagina esercizi in costruzione</div>;
-const BillingPage = () => <div>Pagina fatturazione in costruzione</div>;
 
 function App() {
   return (
@@ -15,10 +13,10 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/patients" element={<PatientsPage />} />
-        <Route path="/appointments" element={<AppointmentsPage />} />
-        <Route path="/exercises" element={<ExercisesPage />} />
-        <Route path="/billing" element={<BillingPage />} />
+        <Route path="/patients" element={<Patients />} />
+        <Route path="/appointments" element={<Appointments />} />
+        <Route path="/exercises" element={<Exercises />} />
+        <Route path="/billing" element={<Billing />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>
