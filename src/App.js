@@ -12,6 +12,8 @@ import Signup from './pages/Signup';
 import Subscription from './pages/Subscription';
 
 function App() {
+  console.log("App rendering");
+  
   return (
     <AuthProvider>
       <BrowserRouter>

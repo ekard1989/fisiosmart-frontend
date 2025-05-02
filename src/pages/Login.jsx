@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -7,8 +7,17 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Questo effetto monitora lo stato dell'utente e reindirizza se autenticato
+  useEffect(() => {
+    if (user) {
+      console.log("Utente autenticato, reindirizzamento alla dashboard");
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,18 +25,22 @@ const Login = () => {
     setLoading(true);
 
     try {
+      console.log("Tentativo di login con:", email);
       const { success, error } = await login(email, password);
+      console.log("Risultato login:", { success, error });
       
-      if (success) {
-        navigate('/dashboard');
-      } else {
+      if (!success) {
         setError(error || 'Si è verificato un errore durante il login');
+        setLoading(false); // Disattiva loading solo in caso di errore
       }
+      // Non impostare loading a false in caso di successo
+      // perché l'useEffect si occuperà del reindirizzamento
+      
     } catch (err) {
+      console.error("Errore durante il login:", err);
       setError('Si è verificato un errore durante il login');
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -60,6 +73,7 @@ const Login = () => {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div>
@@ -74,6 +88,7 @@ const Login = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
             </div>
           </div>
