@@ -1,4 +1,6 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 
 const StatCard = ({ title, value, icon, color }) => (
@@ -35,6 +37,17 @@ const AppointmentItem = ({ time, patient, type, status }) => (
 );
 
 const Dashboard = () => {
+  // Aggiunto per debug dell'autenticazione
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  
+  console.log("Dashboard - User auth status:", user);
+  
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   // Questi dati sarebbero normalmente recuperati dal backend
   const stats = [
     { title: 'Appuntamenti Oggi', value: '8', icon: 'fa-calendar-day', color: 'bg-primary' },
@@ -52,6 +65,19 @@ const Dashboard = () => {
 
   return (
     <MainLayout title="Dashboard">
+      {/* Aggiunto indicatore stato autenticazione */}
+      <div className="mb-4 p-4 bg-white rounded-lg shadow-md">
+        <p className="text-gray-700 mb-2">
+          Stato autenticazione: {user ? `Autenticato (${user.email})` : 'Non autenticato'}
+        </p>
+        <button 
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Test Logout
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => (
           <StatCard key={index} {...stat} />
