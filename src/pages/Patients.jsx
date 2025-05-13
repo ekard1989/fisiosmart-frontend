@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
+import { patientService } from '../services/api';
 
 const PatientRow = ({ patient, onView }) => (
   <tr className="hover:bg-gray-50">
@@ -40,29 +42,40 @@ const PatientRow = ({ patient, onView }) => (
 );
 
 const Patients = () => {
+  const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
   
-  // Dati di esempio
-  const patientsData = [
-    { id: 1, firstName: 'Marco', lastName: 'Rossi', email: 'marco.rossi@example.com', phone: '333 1234567', status: 'active', lastVisit: '19/04/2025' },
-    { id: 2, firstName: 'Laura', lastName: 'Bianchi', email: 'laura.b@example.com', phone: '333 7654321', status: 'active', lastVisit: '15/04/2025' },
-    { id: 3, firstName: 'Giuseppe', lastName: 'Verdi', email: 'g.verdi@example.com', phone: '333 9876543', status: 'active', lastVisit: '10/04/2025' },
-    { id: 4, firstName: 'Anna', lastName: 'Neri', email: 'anna.neri@example.com', phone: '333 3456789', status: 'inactive', lastVisit: '05/03/2025' },
-    { id: 5, firstName: 'Sofia', lastName: 'Romano', email: 's.romano@example.com', phone: '333 8765432', status: 'active', lastVisit: '18/04/2025' },
-  ];
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoading(true);
+        const data = await patientService.getAll();
+        setPatients(data);
+      } catch (err) {
+        console.error("Error fetching patients:", err);
+        setError("Si è verificato un errore nel caricamento dei pazienti");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPatients();
+  }, []);
   
   // Filtra i pazienti in base al termine di ricerca
-  const filteredPatients = patientsData.filter(patient => 
-    patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.phone.includes(searchTerm)
+  const filteredPatients = patients.filter(patient => 
+    patient.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (patient.email && patient.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (patient.phone && patient.phone.includes(searchTerm))
   );
   
   const handleViewPatient = (id) => {
-    // Qui implementeremo la navigazione alla pagina del paziente
-    console.log(`Visualizza paziente con ID: ${id}`);
+    navigate(`/patients/${id}`);
   };
   
   return (
@@ -91,48 +104,66 @@ const Patients = () => {
         </button>
       </div>
       
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Paziente
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Telefono
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ultima Visita
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">Azioni</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPatients.map(patient => (
-                <PatientRow 
-                  key={patient.id} 
-                  patient={patient} 
-                  onView={handleViewPatient} 
-                />
-              ))}
-            </tbody>
-          </table>
+      {loading ? (
+        <div className="flex justify-center items-center h-60">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-        
-        {filteredPatients.length === 0 && (
-          <div className="text-center py-6">
-            <p className="text-gray-500">Nessun paziente trovato</p>
+      ) : error ? (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+          <p>{error}</p>
+        </div>
+      ) : (
+        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Paziente
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Telefono
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ultima Visita
+                  </th>
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">Azioni</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredPatients.map(patient => (
+                  <PatientRow 
+                    key={patient.id} 
+                    patient={{
+                      id: patient.id,
+                      firstName: patient.first_name,
+                      lastName: patient.last_name,
+                      email: patient.email || '',
+                      phone: patient.phone || '',
+                      status: 'active', // Questo potrebbe essere un campo reale in futuro
+                      lastVisit: new Date(patient.created_at).toLocaleDateString() // In futuro, questo sarà la data dell'ultima visita
+                    }} 
+                    onView={handleViewPatient} 
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+          
+          {filteredPatients.length === 0 && (
+            <div className="text-center py-6">
+              <p className="text-gray-500">Nessun paziente trovato</p>
+            </div>
+          )}
+        </div>
+      )}
       
-      {/* Qui implementeremo il modale per aggiungere un nuovo paziente */}
+      {/* In futuro, qui implementeremo il modale per aggiungere un nuovo paziente */}
     </MainLayout>
   );
 };
