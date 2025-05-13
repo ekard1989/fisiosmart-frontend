@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
 
 const NavItem = ({ to, icon, children }) => {
   const location = useLocation();
@@ -24,12 +23,16 @@ const NavItem = ({ to, icon, children }) => {
 
 const Sidebar = () => {
   const { logout } = useAuth();
-const handleLogout = async () => {
-await logout();
+  const navigate = useNavigate(); // Aggiungi questo hook per il reindirizzamento
+
+  const handleLogout = async () => {
+    const { success } = await logout();
+    if (success) {
+      navigate('/login'); // Reindirizza alla pagina di login dopo il logout
+    }
   };
 
-
-return (
+  return (
     <div className="w-64 bg-white h-full shadow-md flex flex-col">
       <div className="flex items-center justify-center h-16 border-b">
         <h1 className="text-xl font-bold text-primary">Fisiosmart</h1>
@@ -78,4 +81,5 @@ return (
     </div>
   );
 };
+
 export default Sidebar;
